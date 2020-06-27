@@ -5,7 +5,8 @@ import io
 import pytesseract
 from wand.image import Image as wi
 import cv2
-
+import re
+from PyPDF2 import PdfFileReader, PdfFileWriter
 
 def deskew(image):
     coords = np.column_stack(np.where(image > 0))
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     pdfImg = pdf.convert('jpeg')
 
     imgBlobs=[]
-    extracted_text=[]
+    separation_pages=[]
 
     for img in pdfImg.sequence:
         page = wi(image=img)
@@ -53,7 +54,56 @@ if __name__ == '__main__':
         im = deskew(im)
 
         text = pytesseract.image_to_string(im, lang = 'eng')
-        extracted_text.append(text)
-        print('start page', i)
+        text = text.split('\n', 1)[0]
+        if re.search(r"[TI]{3,12}", text):
+            separation_pages.append(i)
 
-    print(text)
+    print(separation_pages)
+
+    current_doc = 0
+    current_page = 0
+
+    #for each seperation page
+    #interval current_page to seperationpage - 1
+    #if end of interval is equal or greater than start
+    #   the create a pdf with those pages
+    #set current_page to seperation+1
+    #after last seperationpage should be the last document
+    #if current_page equal or greater than
+
+    with open(pdf_path, 'rb') as infile:
+        reader = PdfFileReader(infile)
+
+        for seperation_page in separation_pages:
+            start = current_page
+            end = seperation_page - 1
+            if start <= end:
+                print('document', start, ' to ', end)
+                writer = PdfFileWriter()
+
+                while start <= end:
+                    writer.addPage(reader.getPage(start))
+                    start += 1
+
+                current_doc += 1
+                with open('output/output' + str(current_doc) + '.pdf', 'wb') as outfile:
+                    writer.write(outfile)
+
+            current_page = seperation_page + 1
+
+        if current_page <= (len(imgBlobs) - 1):
+            print('lastdocument', current_page, ' to ', len(imgBlobs) - 1)
+            start = current_page
+            end = len(imgBlobs) - 1
+            writer = PdfFileWriter()
+
+            while start <= end:
+                writer.addPage(reader.getPage(start))
+                start += 1
+
+            current_doc += 1
+            with open('output/output' + str(current_doc) + '.pdf', 'wb') as outfile:
+                writer.write(outfile)
+
+
+    print('done')
