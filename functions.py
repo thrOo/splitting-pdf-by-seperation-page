@@ -22,7 +22,7 @@ def deskew(image):
 
 def splitPdf(pdf_path):
     filename = pdf_path[pdf_path.rfind('/')+1:-4]
-
+    print(filename,'starting')
     pdf=wi(filename = pdf_path,resolution=300)
     pdfImg = pdf.convert('jpeg')
 
@@ -33,7 +33,7 @@ def splitPdf(pdf_path):
         page = wi(image=img)
         imgBlobs.append(page.make_blob('jpeg'))
 
-    print("Pages found: ", len(imgBlobs))
+    print(filename,"Pages found: ", len(imgBlobs))
 
     for i, imgBlob in enumerate(imgBlobs):
         image_stream = io.BytesIO(imgBlob)
@@ -50,7 +50,7 @@ def splitPdf(pdf_path):
         if re.search(r"[TI]{3,12}", text):
             separation_pages.append(i)
 
-    print("separation_pages:", separation_pages)
+    print(filename,"separation_pages:", separation_pages)
 
     current_doc = 0
     current_page = 0
@@ -96,3 +96,4 @@ def splitPdf(pdf_path):
                 writer.write(outfile)
 
     # os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
+    print(filename,'ending')
