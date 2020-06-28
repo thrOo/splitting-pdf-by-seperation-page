@@ -31,6 +31,11 @@ if __name__ == '__main__':
         raise FileNotFoundError
 
     pdf_path = args.file
+    # last dash and remove .pdf
+
+
+    filename = pdf_path[pdf_path.rfind('/')+1:-4]
+
     pdf=wi(filename = pdf_path,resolution=300)
     pdfImg = pdf.convert('jpeg')
 
@@ -58,7 +63,7 @@ if __name__ == '__main__':
         if re.search(r"[TI]{3,12}", text):
             separation_pages.append(i)
 
-    print(separation_pages)
+    print("separation_pages:", separation_pages)
 
     current_doc = 0
     current_page = 0
@@ -78,7 +83,6 @@ if __name__ == '__main__':
             start = current_page
             end = seperation_page - 1
             if start <= end:
-                print('document', start, ' to ', end)
                 writer = PdfFileWriter()
 
                 while start <= end:
@@ -86,13 +90,12 @@ if __name__ == '__main__':
                     start += 1
 
                 current_doc += 1
-                with open('output/output' + str(current_doc) + '.pdf', 'wb') as outfile:
+                with open('output/'+ filename + '_doc' + str(current_doc) + '.pdf', 'wb') as outfile:
                     writer.write(outfile)
 
             current_page = seperation_page + 1
 
         if current_page <= (len(imgBlobs) - 1):
-            print('lastdocument', current_page, ' to ', len(imgBlobs) - 1)
             start = current_page
             end = len(imgBlobs) - 1
             writer = PdfFileWriter()
@@ -102,8 +105,8 @@ if __name__ == '__main__':
                 start += 1
 
             current_doc += 1
-            with open('output/output' + str(current_doc) + '.pdf', 'wb') as outfile:
+            with open('output/output' + filename + '_doc' + str(current_doc) + '.pdf', 'wb') as outfile:
                 writer.write(outfile)
 
-
-    print('done')
+    os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
+    print('DONE')
