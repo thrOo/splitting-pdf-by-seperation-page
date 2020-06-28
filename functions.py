@@ -49,7 +49,8 @@ def splitPdf(pdf_path):
         text = text.split('\n', 1)[0]
         if re.search(r"[TI]{3,12}", text):
             separation_pages.append(i)
-
+            
+    imgBlobs = []
     print(filename,"separation_pages:", separation_pages)
 
     current_doc = 0
