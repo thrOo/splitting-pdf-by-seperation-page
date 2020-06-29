@@ -20,9 +20,11 @@ def deskew(image):
     rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
     return rotated
 
-def splitPdf(pdf_path):
+def splitPdf(pdf_path, verbose, dir):
     filename = pdf_path[pdf_path.rfind('/')+1:-4]
-    print(filename,'starting')
+    if verbose:
+        print(filename,'starting')
+
     pdf=wi(filename = pdf_path,resolution=300)
     pdfImg = pdf.convert('jpeg')
 
@@ -33,7 +35,8 @@ def splitPdf(pdf_path):
         page = wi(image=img)
         imgBlobs.append(page.make_blob('jpeg'))
 
-    print(filename,"Pages found: ", len(imgBlobs))
+    if verbose:
+        print(filename,"Pages found: ", len(imgBlobs))
 
     for i, imgBlob in enumerate(imgBlobs):
         image_stream = io.BytesIO(imgBlob)
@@ -49,9 +52,10 @@ def splitPdf(pdf_path):
         text = text.split('\n', 1)[0]
         if re.search(r"[TI]{3,12}", text):
             separation_pages.append(i)
-            
+
     imgBlobs = []
-    print(filename,"separation_pages:", separation_pages)
+    if verbose:
+        print(filename,"separation_pages:", separation_pages)
 
     current_doc = 0
     current_page = 0
@@ -78,7 +82,7 @@ def splitPdf(pdf_path):
                     start += 1
 
                 current_doc += 1
-                with open('output/'+ filename + '_doc' + str(current_doc) + '.pdf', 'wb') as outfile:
+                with open( dir + '/output/' + filename + '_doc' + str(current_doc) + '.pdf', 'wb') as outfile:
                     writer.write(outfile)
 
             current_page = seperation_page + 1
@@ -93,8 +97,9 @@ def splitPdf(pdf_path):
                 start += 1
 
             current_doc += 1
-            with open('output/output' + filename + '_doc' + str(current_doc) + '.pdf', 'wb') as outfile:
+            with open( dir + '/output/' + filename + '_doc' + str(current_doc) + '.pdf', 'wb') as outfile:
                 writer.write(outfile)
 
-    # os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
-    print(filename,'ending')
+    os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
+    if verbose:
+        print(filename,'ending')
