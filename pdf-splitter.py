@@ -4,13 +4,14 @@ import re
 import multiprocessing
 import time
 
-from functions import splitPdf
+from functions import splitPdfBySeparationPage, splitPdfEachPage
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script')
     parser.add_argument('-d', nargs='?', help='a directory-path to directory')
     parser.add_argument('-t', nargs='?', help='number of proccesses/threads')
     parser.add_argument('-v', action='store_true', help='enable some more output')
+    parser.add_argument('-single', action='store_true', help='enable some more output')
 
     args = parser.parse_args()
     if args.d is None:
@@ -35,7 +36,10 @@ if __name__ == '__main__':
             if not re.search(r"_done", file):
                 file_count += 1
                 file_path =  args.d + '/' + file
-                pool.apply_async(splitPdf, args=(file_path, args.v, args.d,))
+                if args.single :
+                    pool.apply_async(splitPdfEachPage, args=(file_path, args.v, args.d,))
+                else :
+                    pool.apply_async(splitPdfBySeparationPage, args=(file_path, args.v, args.d,))
 
     pool.close()
     pool.join()

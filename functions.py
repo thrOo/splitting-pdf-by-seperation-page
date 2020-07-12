@@ -20,7 +20,7 @@ def deskew(image):
     rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
     return rotated
 
-def splitPdf(pdf_path, verbose, dir):
+def splitPdfBySeparationPage(pdf_path, verbose, dir):
     filename = pdf_path[pdf_path.rfind('/')+1:-4]
     if verbose:
         print(filename,'starting')
@@ -101,5 +101,24 @@ def splitPdf(pdf_path, verbose, dir):
                 writer.write(outfile)
 
     os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
+    if verbose:
+        print(filename,'ending')
+
+def splitPdfEachPage(pdf_path, verbose, dir):
+    filename = pdf_path[pdf_path.rfind('/')+1:-4]
+    if verbose:
+        print(filename,'starting')
+
+    with open(pdf_path, 'rb') as infile:
+        reader = PdfFileReader(infile)
+        for page in range(reader.getNumPages()):
+            writer = PdfFileWriter()
+            writer.addPage(reader.getPage(page))
+
+            with open( dir + '/output/' + filename + '_doc' + str(page+1) + '.pdf', 'wb') as outfile:
+                writer.write(outfile)
+
+    os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
+
     if verbose:
         print(filename,'ending')
