@@ -3,19 +3,22 @@ import os
 import re
 import multiprocessing
 import time
-
-from functions import splitPdfBySeparationPage, splitPdfEachPage
+from functions import splitPdfBySeparationPage, splitPdfEachPage, ocrPages
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script')
     parser.add_argument('-d', nargs='?', help='a directory-path to directory')
     parser.add_argument('-t', nargs='?', help='number of proccesses/threads')
     parser.add_argument('-v', action='store_true', help='enable some more output')
-    parser.add_argument('-single', action='store_true', help='enable some more output')
+    parser.add_argument('-single', action='store_true', help='splits after each page')
+    parser.add_argument('-ocr', action='store_true', help='ocr and deskew')
 
     args = parser.parse_args()
     if args.d is None:
         raise FileNotFoundError
+
+    if args.single and args.ocr:
+        raise NotImplementedError
 
     print(args.d)
     output_path = args.d + '/output'
@@ -38,6 +41,8 @@ if __name__ == '__main__':
                 file_path =  args.d + '/' + file
                 if args.single :
                     pool.apply_async(splitPdfEachPage, args=(file_path, args.v, args.d,))
+                elif args.ocr :
+                    pool.apply_async(ocrPages, args=(file_path, args.v, args.d,))
                 else :
                     pool.apply_async(splitPdfBySeparationPage, args=(file_path, args.v, args.d,))
 

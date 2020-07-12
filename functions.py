@@ -6,6 +6,7 @@ from wand.image import Image as wi
 import cv2
 import re
 from PyPDF2 import PdfFileReader, PdfFileWriter
+import subprocess
 
 def deskew(image):
     coords = np.column_stack(np.where(image > 0))
@@ -117,6 +118,24 @@ def splitPdfEachPage(pdf_path, verbose, dir):
 
             with open( dir + '/output/' + filename + '_doc' + str(page+1) + '.pdf', 'wb') as outfile:
                 writer.write(outfile)
+
+    os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
+
+    if verbose:
+        print(filename,'ending')
+
+def ocrPages(pdf_path, verbose, dir):
+    filename = pdf_path[pdf_path.rfind('/')+1:-4]
+    if verbose:
+        print(filename,'starting')
+
+    outputFile = dir + '/output/' + filename + '.pdf'
+
+    cmd = ['ocrmypdf','-l', 'deu','--deskew','--remove-background', '--clean', pdf_path, outputFile]
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    for line in p.stdout:
+        print(line)
+    p.wait()
 
     os.rename(pdf_path, pdf_path[:-4] + '_done.pdf')
 
