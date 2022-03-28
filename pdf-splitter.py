@@ -3,7 +3,7 @@ import os
 import re
 import multiprocessing
 import time
-from functions import splitPdfBySeparationPage, splitPdfEachPage, ocrPages
+from functions import splitPdfByBarCodeSeparationPage, splitPdfEachPage
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script')
@@ -11,7 +11,6 @@ if __name__ == '__main__':
     parser.add_argument('-t', nargs='?', help='number of proccesses/threads')
     parser.add_argument('-v', action='store_true', help='enable some more output')
     parser.add_argument('-single', action='store_true', help='splits after each page')
-    parser.add_argument('-ocr', action='store_true', help='ocr and deskew')
 
     args = parser.parse_args()
     if args.d is None:
@@ -35,16 +34,15 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(threads)
     file_count = 0
     for file in file_list:
-        if file.endswith(".pdf"):
+        if file.lower().endswith(".pdf"):
             if not re.search(r"_done", file):
                 file_count += 1
                 file_path =  args.d + '/' + file
                 if args.single :
                     pool.apply_async(splitPdfEachPage, args=(file_path, args.v, args.d,))
-                elif args.ocr :
-                    pool.apply_async(ocrPages, args=(file_path, args.v, args.d,))
                 else :
-                    pool.apply_async(splitPdfBySeparationPage, args=(file_path, args.v, args.d,))
+                    splitPdfByBarCodeSeparationPage(file_path, args.v, args.d,)
+                    #pool.apply_async(splitPdfByBarCodeSeparationPage, args=(file_path, args.v, args.d,))
 
     pool.close()
     pool.join()
