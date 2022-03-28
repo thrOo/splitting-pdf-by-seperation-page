@@ -6,7 +6,7 @@ import time
 from functions import splitPdfByBarCodeSeparationPage, splitPdfEachPage
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Testing script')
+    parser = argparse.ArgumentParser(description='Splitting script')
     parser.add_argument('-d', nargs='?', help='a directory-path to directory')
     parser.add_argument('-t', nargs='?', help='number of proccesses/threads')
     parser.add_argument('-v', action='store_true', help='enable some more output')
