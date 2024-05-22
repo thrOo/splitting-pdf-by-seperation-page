@@ -39,9 +39,11 @@ if __name__ == '__main__':
                 file_count += 1
                 file_path =  args.d + '/' + file
                 if args.single :
-                    pool.apply_async(splitPdfEachPage, args=(file_path, args.v, args.d,))
+                    result = pool.apply_async(splitPdfEachPage, args=(file_path, args.v, args.d,))
+                    result.get()
                 else :
-                    pool.apply_async(splitPdfByBarCodeSeparationPage, args=(file_path, args.v, args.d,))
+                    result = pool.apply_async(splitPdfByBarCodeSeparationPage, args=(file_path, args.v, args.d,))
+                    result.get()
 
     pool.close()
     pool.join()

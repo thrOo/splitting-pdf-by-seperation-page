@@ -1,6 +1,6 @@
 import os
 import re
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfReader, PdfWriter
 
 from pyzbar.pyzbar import decode
 from pdf2image import convert_from_path
@@ -37,16 +37,16 @@ def splitPdfByBarCodeSeparationPage(pdf_path, verbose, dir):
     #if current_page equal or greater than
 
     with open(pdf_path, 'rb') as infile:
-        reader = PdfFileReader(infile)
+        reader = PdfReader(infile)
 
         for seperation_page in separation_pages:
             start = current_page
             end = seperation_page - 1
             if start <= end:
-                writer = PdfFileWriter()
+                writer = PdfWriter()
 
                 while start <= end:
-                    writer.addPage(reader.getPage(start))
+                    writer.add_page(reader.pages[start])
                     start += 1
 
                 current_doc += 1
@@ -58,10 +58,10 @@ def splitPdfByBarCodeSeparationPage(pdf_path, verbose, dir):
         if current_page <= (len(images) - 1):
             start = current_page
             end = len(images) - 1
-            writer = PdfFileWriter()
+            writer = PdfWriter()
 
             while start <= end:
-                writer.addPage(reader.getPage(start))
+                writer.add_page(reader.pages[start])
                 start += 1
 
             current_doc += 1
@@ -80,8 +80,8 @@ def splitPdfEachPage(pdf_path, verbose, dir):
     with open(pdf_path, 'rb') as infile:
         reader = PdfFileReader(infile)
         for page in range(reader.getNumPages()):
-            writer = PdfFileWriter()
-            writer.addPage(reader.getPage(page))
+            writer = PdfWriter()
+            writer.add_page(reader.pages[page])
 
             with open( dir + '/output/' + filename + '_doc' + str(page+1) + '.pdf', 'wb') as outfile:
                 writer.write(outfile)
